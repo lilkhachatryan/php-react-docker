@@ -1,0 +1,28 @@
+<?php
+namespace Src\TableGateways;
+
+class NameGateway {
+
+    private $db = null;
+
+    public function __construct($db) {
+        $this->db = $db;
+    }
+
+    public function findAll() {
+        $statement = "
+            SELECT 
+                id, name
+            FROM
+                names;
+        ";
+
+        try {
+            $statement = $this->db->query($statement);
+            $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+            return $result;
+        } catch (\PDOException $e) {
+            exit($e->getMessage());
+        }
+    }
+}
