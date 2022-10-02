@@ -7,6 +7,7 @@ class DatabaseConnector {
 
     public function __construct()
     {
+        
         $host = getenv('DB_HOST');
         $port = getenv('DB_PORT');
         $db   = getenv('DB_DATABASE');
@@ -26,6 +27,7 @@ class DatabaseConnector {
 
     public function getConnection()
     {
+        echo 'test';
         return $this->dbConnection;
     }
 }

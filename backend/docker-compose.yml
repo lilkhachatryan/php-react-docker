@@ -22,8 +22,6 @@ services:
     # image: php:7.2-fpm
     build: .
     container_name: fpmcontainer
-    links:
-      - docker-mysql
     depends_on:
       - docker-mysql
     volumes:
@@ -34,11 +32,11 @@ services:
       - PHP_FPM_SERVER_ADDR=php
       - PHP_FPM_SERVER_PORT=9000
       - PHP_FPM_TIMEOUT=${HTTPD_TIMEOUT_TO_PHP_FPM:-180}
-      - DB_HOST=127.0.0.1
+      - DB_HOST=docker-mysql
       - DB_PORT=3306
       - DB_DATABASE=get_name
-      - DB_USERNAME=root
-      - DB_PASSWORD=
+      - DB_USERNAME=getname
+      - DB_PASSWORD=getname
     networks:
       - getname
  # Mysql configuration
@@ -48,19 +46,15 @@ services:
     restart: always
     command: '--default-authentication-plugin=mysql_native_password'
     environment:
-        # - MYSQL_ROOT_PASSWORD=password
-        # - MYSQL_USER=getname
-        # - MYSQL_DATABASE=get_name
-        # - MYSQL_PASSWORD=W0rdprestaBapaworD
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_DATABASE: get_name
-      MYSQL_USER: root
-      MYSQL_PASSWORD: 
-      MYSQL_ROOT_PASSWORD: 
+      MYSQL_USER: getname
+      MYSQL_PASSWORD: getname
+      MYSQL_ROOT_PASSWORD: root
     ports:
-        - "9906:3306"
+      - "9906:3306"
     volumes:
-        - ./dbdata:/var/lib/mysql
+      - ./dump/dump.sql:/docker-entrypoint-initdb.d/setup.sql
+      - ./dbdata:/var/lib/mysql
     networks:
       - getname
 volumes:
