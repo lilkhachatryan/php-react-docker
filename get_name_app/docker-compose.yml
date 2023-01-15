@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
 
-  sample:
+  get-namme-app:
     container_name: get-name
     build:
       context: .

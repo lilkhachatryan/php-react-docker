@@ -24,6 +24,9 @@ class NameController {
             case 'GET':
                 $response = $this->getAllNames();
                 break;
+            case 'POST':
+                $response = $this->addName();
+                break;
             default:
                 $response = $this->notFoundResponse();
                 break;
@@ -41,6 +44,14 @@ class NameController {
         $response['body'] = json_encode($result);
         return $response;
     }
+
+    private function addName($name)
+        {
+            $result = $this->nameGateway->addName($name);
+            $response['status_code_header'] = 'HTTP/1.1 200 OK';
+            $response['body'] = json_encode($result);
+            return $response;
+        }
 
     private function notFoundResponse()
     {

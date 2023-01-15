@@ -5,7 +5,7 @@
 require 'database.php';
 
 $names = [];
-$sql = "SELECT id, name FROM names";
+$sql = "SELECT id, name FROM Names";
 
 if($result = mysqli_query($con, $sql)) {
   $i = 0;

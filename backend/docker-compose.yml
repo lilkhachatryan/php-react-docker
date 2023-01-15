@@ -1,14 +1,70 @@
 version: '3'
 services:
- # Nginx server configuration   
+  haproxy:
+    image: haproxy:latest
+#    build: ./haproxy
+    container_name: haproxy
+    ports:
+      - "9906:3306"
+      - "4040:80"
+    depends_on:
+      - percona1
+      - percona2
+      - percona3
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=secret
+    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#      - /run/haproxy/
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    networks:
+      - getname
+  percona1:
+    image: percona/percona-xtradb-cluster:latest
+    container_name: percona1
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - CLUSTER_NAME=mycluster
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d/
+      - ./dbdata1:/var/lib/mysql
+    networks:
+      - getname
+  percona2:
+    image: percona/percona-xtradb-cluster:latest
+    container_name: percona2
+    depends_on:
+      - percona1
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - CLUSTER_NAME=mycluster
+      - JOIN_IP=percona1
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d/
+      - ./dbdata2:/var/lib/mysql
+    networks:
+      - getname
+  percona3:
+    image: percona/percona-xtradb-cluster:latest
+    container_name: percona3
+    depends_on:
+      - percona1
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - CLUSTER_NAME=mycluster
+      - JOIN_IP=percona1
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d/
+      - ./dbdata3:/var/lib/mysql
+    networks:
+      - getname
+  # Nginx server configuration
   web:
     image: nginx:1.17
     container_name: webserver
     depends_on:
-      - docker-mysql
-      - php
-    links:
-      - docker-mysql
+      - haproxy
       - php
     volumes:
       - .:/var/www/html
@@ -19,47 +75,31 @@ services:
       - getname
  # Php-fpm configuration
   php:
-    # image: php:7.2-fpm
     build: .
     container_name: fpmcontainer
     depends_on:
-      - docker-mysql
+      - haproxy
     volumes:
       - .:/var/www/html
-      # - ./php:/usr/local/etc/php/php.ini
+#       - ./php:/usr/local/etc/php/php.ini
+    expose:
+      - "9000"
     environment:
       - PHP_FPM_ENABLE=1
       - PHP_FPM_SERVER_ADDR=php
       - PHP_FPM_SERVER_PORT=9000
       - PHP_FPM_TIMEOUT=${HTTPD_TIMEOUT_TO_PHP_FPM:-180}
-      - DB_HOST=docker-mysql
+      - DB_HOST=haproxy
       - DB_PORT=3306
       - DB_DATABASE=get_name
-      - DB_USERNAME=getname
-      - DB_PASSWORD=getname
-    networks:
-      - getname
- # Mysql configuration
-  docker-mysql:
-    image: mysql:5.7
-    container_name: docker-mysql-demo
-    restart: always
-    command: '--default-authentication-plugin=mysql_native_password'
-    environment:
-      MYSQL_DATABASE: get_name
-      MYSQL_USER: getname
-      MYSQL_PASSWORD: getname
-      MYSQL_ROOT_PASSWORD: root
-    ports:
-      - "9906:3306"
-    volumes:
-      - ./dump/dump.sql:/docker-entrypoint-initdb.d/setup.sql
-      - ./dbdata:/var/lib/mysql
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret
     networks:
       - getname
 volumes:
-  dbdata:
-
+  dbdata1:
+  dbdata2:
+  dbdata3:
 networks:
   getname:
     driver: bridge

@@ -17,3 +17,8 @@ COPY . ./
 
 # start app
 CMD ["npm", "start"]
+
+
+
+# TODO
+# ADD test.sql /docker-entrypoint-initdb.d

@@ -14,7 +14,7 @@ class NameGateway {
             SELECT 
                 id, name
             FROM
-                names;
+                Names;
         ";
 
         try {
@@ -25,4 +25,19 @@ class NameGateway {
             exit($e->getMessage());
         }
     }
+
+    public function addName($name) {
+            $statement = `
+                INSERT INTO Names (name)
+                VALUES (` + $name + `);
+            `;
+
+            try {
+                $statement = $this->db->query($statement);
+                $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+                return $result;
+            } catch (\PDOException $e) {
+                exit($e->getMessage());
+            }
+        }
 }

@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
 
-  todo-prod:
+  get-name-app-prod:
     container_name: get-name-prod
     build:
       context: .
